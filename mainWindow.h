@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,10 +19,13 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    QString operatori = "÷x+-,";
     QPushButton* skaitluPogas[10] = {};
+    QPushButton* simboluPogas[5] = {};
 
 private slots:
     void ciparuNospiesana();
+    void simboluNospiesana();
 };
 
 #endif

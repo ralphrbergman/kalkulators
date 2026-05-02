@@ -23,12 +23,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         connect(poga, &QPushButton::clicked, this, &MainWindow::ciparuNospiesana);
     }
+
+    this->simboluPogas[0] = ui->division;
+    this->simboluPogas[1] = ui->multiply;
+    this->simboluPogas[2] = ui->plus;
+    this->simboluPogas[3] = ui->minus;
+    this->simboluPogas[4] = ui->comma;
+
+    for (QPushButton* poga : this->simboluPogas) {
+        if (!poga) continue;
+
+        connect(poga, &QPushButton::clicked, this, &MainWindow::simboluNospiesana);
+    }
 }
 
 void MainWindow::ciparuNospiesana() {
     QPushButton* poga = qobject_cast<QPushButton*>(sender());
 
     ui->field->setText(ui->field->text() + poga->text());
+}
+
+void MainWindow::simboluNospiesana() {
+    QPushButton* poga = qobject_cast<QPushButton*>(sender());
+    QString teksts = ui->field->text();
+
+    // Neatļaujam lietotājam ievadīt simbolu ja lauka sākumā nav ievadīts kaut viens cipars!
+    if (
+        !teksts.isEmpty() &&
+        teksts[0].isDigit() &&
+        !this->operatori.contains(teksts.back())
+    ) {
+        ui->field->setText(ui->field->text() + poga->text());
+    }
 }
 
 MainWindow::~MainWindow() {
