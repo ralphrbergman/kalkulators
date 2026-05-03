@@ -275,6 +275,8 @@ void MainWindow::simboluNospiesana() {
 }
 
 void MainWindow::equalsNospiesana() {
+    bool joksAtrasts = false;
+
     std::string izteiksme = ui->field->text().toStdString();
     std::deque<Tokens> tokeni = dabutTokenus(izteiksme);
     std::queue<Tokens> rinda = algoritms(tokeni);
@@ -282,13 +284,23 @@ void MainWindow::equalsNospiesana() {
     std::string rezultats = salabotNumuru(std::to_string(aprekinat(rinda)));
     std::string rezultatuTeksts;  // Šī vērtība aizstās visu kas atrodas lauciņā.
 
+    // Atrodam jokus balstoties uz aprēķinu instrukcijām.
+    std::map<std::string, std::string> instrukcijuJoki = this->instrukcijuJoki;
+    auto iterators = instrukcijuJoki.find(izteiksme);
+
+    if (iterators != instrukcijuJoki.end()) {
+        rezultatuTeksts = iterators->second;
+        joksAtrasts = true;
+    }
+
     // Atrodam jokus balstoties uz rezultāta summas.
     std::map<std::string, std::string> rezultatuJoki = this->rezultatuJoki;
-    auto iterators = rezultatuJoki.find(rezultats);
+    iterators = rezultatuJoki.find(rezultats);
 
     if (iterators != rezultatuJoki.end()) {
         rezultatuTeksts = iterators->second;
-    } else {
+    }
+    else if (!joksAtrasts) {
         rezultatuTeksts = rezultats;
     }
 

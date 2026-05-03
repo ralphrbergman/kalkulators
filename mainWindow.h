@@ -26,6 +26,13 @@ private:
 
     bool isJoke = false;
 
+    // Karte jokiem balstoties uz lietotāja instrukcijām.
+    std::map<std::string, std::string> instrukcijuJoki = {
+        {"1+1", "11"},
+        {"6+7", "67"},
+        {"9+10", "21"}
+    };
+
     // Arī joku karte bet ar gala rezultātu tulkošanu uz joku.
     std::map<std::string, std::string> rezultatuJoki = {
         {"67", "SIX SEVENNNN"},
