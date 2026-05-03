@@ -19,7 +19,7 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    QString operatori = "÷x+-";
+    QString operatori = "/x+-";
     QPushButton* skaitluPogas[10] = {};
     QPushButton* simboluPogas[5] = {};
 

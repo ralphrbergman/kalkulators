@@ -53,7 +53,7 @@ void MainWindow::simboluNospiesana() {
     if (pogasTeksts == "-") {
         if (
             teksts.isEmpty() ||
-            teksts.back() == "÷" ||
+            teksts.back() == "/" ||
             teksts.back() == "x" ||
             teksts.back() == "+"
         ) {
@@ -62,7 +62,7 @@ void MainWindow::simboluNospiesana() {
     }
     else if (pogasTeksts == ",") {
         // Operatori atdala numurus kuriem var būt komats.
-        int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[÷x+-]"));
+        int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[/x+-]"));
         QString pedejaisSkaitlis = teksts.mid(pedejaisOp + 1);
 
         if (!pedejaisSkaitlis.contains(",")) {
