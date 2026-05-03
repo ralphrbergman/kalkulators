@@ -1,11 +1,11 @@
 #include "mainWindow.h"
 #include "ui_kalkulators.h"
+#include <QRegularExpression>
 #include <iomanip>
 #include <queue>
 #include <stack>
 #include <sstream>
 #include <vector>
-#include <QRegularExpression>
 
 class Tokens {
     public:
@@ -51,18 +51,26 @@ std::deque<Tokens> dabutTokenus(std::string izteiksme) {
     return kaudze;
 }
 
-std::string salabotNumuru(std::string x) {
+std::string salabotNumuru(std::string numursStr) {
     std::ostringstream tekstsIzeja;
-    std::string teksts;
+    double numurs = std::stod(numursStr);
 
-    double numurs = std::stod(x);
-    tekstsIzeja << std::setprecision(10) << numurs;
-    teksts = tekstsIzeja.str();
+    tekstsIzeja << std::fixed << std::setprecision(10) << numurs;
+    std::string teksts = tekstsIzeja.str();
 
-    size_t beigas = teksts.find_last_not_of('.') + 1;
-    teksts.erase(beigas);
+    size_t pedejaisCipars = teksts.find_last_not_of('0');
 
-    return teksts;
+    if (
+        pedejaisCipars != std::string::npos && 
+        (
+            teksts[pedejaisCipars] == '.' ||
+            teksts[pedejaisCipars] == ','
+        )
+    ) {
+        pedejaisCipars--;
+    }
+
+    return teksts.substr(0, pedejaisCipars + 1);
 }
 
 std::queue<Tokens> algoritms(std::deque<Tokens> kaudze) {
@@ -168,8 +176,10 @@ double aprekinat(std::queue<Tokens> izvade) {
     return operandi[0];
 }
 
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    this->setFixedSize(QSize(400, 625));
 
     // Nerādam lietotājam "Lauks" tekstu, tas maisīsies ar tālāk ievadītajiem cipariem.
     ui->field->setText("");
@@ -268,9 +278,21 @@ void MainWindow::equalsNospiesana() {
     std::string izteiksme = ui->field->text().toStdString();
     std::deque<Tokens> tokeni = dabutTokenus(izteiksme);
     std::queue<Tokens> rinda = algoritms(tokeni);
-    double rezultats = aprekinat(rinda);
 
-    ui->field->setText(QString::number(rezultats));
+    std::string rezultats = salabotNumuru(std::to_string(aprekinat(rinda)));
+    std::string rezultatuTeksts;  // Šī vērtība aizstās visu kas atrodas lauciņā.
+
+    // Atrodam jokus balstoties uz rezultāta summas.
+    std::map<std::string, std::string> rezultatuJoki = this->rezultatuJoki;
+    auto iterators = rezultatuJoki.find(rezultats);
+
+    if (iterators != rezultatuJoki.end()) {
+        rezultatuTeksts = iterators->second;
+    } else {
+        rezultatuTeksts = rezultats;
+    }
+
+    ui->field->setText(QString::fromStdString(rezultatuTeksts).replace(".", ","));
 }
 
 MainWindow::~MainWindow() {

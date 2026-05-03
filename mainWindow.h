@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QString>
+#include <map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,6 +23,15 @@ private:
     QString operatori = "/x+-";
     QPushButton* skaitluPogas[10] = {};
     QPushButton* simboluPogas[5] = {};
+
+    bool isJoke = false;
+
+    // Arī joku karte bet ar gala rezultātu tulkošanu uz joku.
+    std::map<std::string, std::string> rezultatuJoki = {
+        {"67", "SIX SEVENNNN"},
+        {"69", "Nice"},
+        {"420", "WEED"}
+    };
 
 private slots:
     void ciparuNospiesana();
