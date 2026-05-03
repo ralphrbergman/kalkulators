@@ -1,5 +1,6 @@
 #include "mainWindow.h"
 #include "ui_kalkulators.h"
+#include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -45,15 +46,26 @@ void MainWindow::ciparuNospiesana() {
 
 void MainWindow::simboluNospiesana() {
     QPushButton* poga = qobject_cast<QPushButton*>(sender());
+    QString pogasTeksts = poga->text();
     QString teksts = ui->field->text();
 
-    // Neatļaujam lietotājam ievadīt simbolu ja lauka sākumā nav ievadīts kaut viens cipars!
-    if (
-        !teksts.isEmpty() &&
-        teksts[0].isDigit() &&
-        !this->operatori.contains(teksts.back())
-    ) {
-        ui->field->setText(ui->field->text() + poga->text());
+    if (pogasTeksts == ",") {
+        // Operatori atdala numurus kuriem var būt komats.
+        int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[÷x+-]"));
+        QString pedejaisSkaitlis = teksts.mid(pedejaisOp + 1);
+
+        if (!pedejaisSkaitlis.contains(",")) {
+            ui->field->setText(teksts + ",");
+        }
+    }
+    else {
+        bool isNegative = teksts.isEmpty() && pogasTeksts == "-";
+        bool isNormalOp = !teksts.isEmpty() && teksts.back().isDigit();
+
+        // Neatļaujam lietotājam ievadīt simbolu ja lauka beigās nav ievadīts kaut viens cipars!
+        if (isNegative || isNormalOp) {
+            ui->field->setText(teksts + pogasTeksts);
+        }
     }
 }
 
