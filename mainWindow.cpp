@@ -219,6 +219,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 void MainWindow::ciparuNospiesana() {
     QPushButton* poga = qobject_cast<QPushButton*>(sender());
 
+    // Sagatavojam lauciņu nākamajam aprēķinam ja ir bijis joks (kurš varētu sastāvēt no burtiem).
+    if (this->isJoke) {
+        ui->field->setText(NULL);
+        this->isJoke = false;
+    }
+
     ui->field->setText(ui->field->text() + poga->text());
 }
 
@@ -299,12 +305,14 @@ void MainWindow::equalsNospiesana() {
 
     if (iterators != rezultatuJoki.end()) {
         rezultatuTeksts = iterators->second;
+        joksAtrasts = true;
     }
     else if (!joksAtrasts) {
         rezultatuTeksts = rezultats;
     }
 
     ui->field->setText(QString::fromStdString(rezultatuTeksts).replace(".", ","));
+    this->isJoke = joksAtrasts;
 }
 
 MainWindow::~MainWindow() {
