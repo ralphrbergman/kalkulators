@@ -26,6 +26,7 @@ private:
 private slots:
     void ciparuNospiesana();
     void simboluNospiesana();
+    void equalsNospiesana();
 };
 
 #endif
