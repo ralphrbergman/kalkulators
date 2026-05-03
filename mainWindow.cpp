@@ -48,25 +48,35 @@ void MainWindow::simboluNospiesana() {
     QPushButton* poga = qobject_cast<QPushButton*>(sender());
     QString pogasTeksts = poga->text();
     QString teksts = ui->field->text();
+    QString papildinajums;  // Šī vērtība būs pievienota teksta laukam.
 
-    if (pogasTeksts == ",") {
+    if (pogasTeksts == "-") {
+        if (
+            teksts.isEmpty() ||
+            teksts.back() == "÷" ||
+            teksts.back() == "x" ||
+            teksts.back() == "+"
+        ) {
+            papildinajums = pogasTeksts;
+        }
+    }
+    else if (pogasTeksts == ",") {
         // Operatori atdala numurus kuriem var būt komats.
         int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[÷x+-]"));
         QString pedejaisSkaitlis = teksts.mid(pedejaisOp + 1);
 
         if (!pedejaisSkaitlis.contains(",")) {
-            ui->field->setText(teksts + ",");
+            papildinajums = ",";
         }
     }
     else {
-        bool isNegative = teksts.isEmpty() && pogasTeksts == "-";
-        bool isNormalOp = !teksts.isEmpty() && teksts.back().isDigit();
-
         // Neatļaujam lietotājam ievadīt simbolu ja lauka beigās nav ievadīts kaut viens cipars!
-        if (isNegative || isNormalOp) {
-            ui->field->setText(teksts + pogasTeksts);
+        if (!teksts.isEmpty() && teksts.back().isDigit()) {
+            papildinajums = pogasTeksts;
         }
     }
+
+    ui->field->setText(teksts + papildinajums);
 }
 
 MainWindow::~MainWindow() {
