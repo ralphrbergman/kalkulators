@@ -1,6 +1,8 @@
 #include "mainWindow.h"
 #include "ui_kalkulators.h"
+#include <QKeySequence>
 #include <QRegularExpression>
+#include <QShortcut>
 #include <iomanip>
 #include <queue>
 #include <stack>
@@ -196,7 +198,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->skaitluPogas[8] = ui->three;
     this->skaitluPogas[9] = ui->zero;
 
-    for (QPushButton* poga : this->skaitluPogas) {
+    for (QPushButton *poga : this->skaitluPogas) {
         if (!poga) continue;
 
         connect(poga, &QPushButton::clicked, this, &MainWindow::ciparuNospiesana);
@@ -210,86 +212,76 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->simboluPogas[4] = ui->comma;
     this->simboluPogas[5] = ui->clear;
 
-    for (QPushButton* poga : this->simboluPogas) {
+    for (QPushButton *poga : this->simboluPogas) {
         if (!poga) continue;
 
         connect(poga, &QPushButton::clicked, this, &MainWindow::simboluNospiesana);
     }
 
     connect(ui->equals, &QPushButton::clicked, this, &MainWindow::equalsNospiesana);
+
+    // Norādam karstos taustiņus.
+    // Ciparnīcas taustiņu kartēšana.
+    for (int i = 0; i <= 9; i++) {
+        QString numurs = QString::number(i);
+        QShortcut *numuraIscels = new QShortcut(QKeySequence(numurs), this);
+
+        connect(numuraIscels, &QShortcut::activated, this, [this, numurs]() {
+            this->pielikt(numurs);
+        });
+    }
+
+    // Simbolu taustiņu kartēšana.
+    for (int i = 0; i < this->operatori.size(); i++) {
+        QString operators = this->operatori[i];
+        QShortcut *simboluIscels = new QShortcut(QKeySequence(operators), this);
+
+        connect(simboluIscels, &QShortcut::activated, this, [this, operators]() {
+            this->pielikt(operators);
+        });
+    }
+
+    // Enter taustiņu kartēšana.
+    QShortcut *enterIscels = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    QShortcut *numEnterIscels = new QShortcut(QKeySequence(Qt::Key_Enter), this);
+
+    connect(enterIscels, &QShortcut::activated, this, &MainWindow::equalsNospiesana);
+    connect(numEnterIscels, &QShortcut::activated, this, &MainWindow::equalsNospiesana);
+
+    // Dzēšanas taustiņu kartēšana.
+    QShortcut *backspaceIscels = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
+    QShortcut *deleteIscels = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+
+    connect(backspaceIscels, &QShortcut::activated, this, &MainWindow::vienaDzesana);
+    connect(deleteIscels, &QShortcut::activated, this, &MainWindow::visaDzesana);
 }
 
 void MainWindow::ciparuNospiesana() {
-    QPushButton* poga = qobject_cast<QPushButton*>(sender());
+    QPushButton *poga = qobject_cast<QPushButton*>(sender());
 
-    // Sagatavojam lauciņu nākamajam aprēķinam ja ir bijis joks (kurš varētu sastāvēt no burtiem).
-    if (this->isJoke) {
-        ui->field->setText(NULL);
-        this->isJoke = false;
-    }
-
-    ui->field->setText(ui->field->text() + poga->text());
+    this->pielikt(poga->text());
 }
 
 void MainWindow::simboluNospiesana() {
-    QPushButton* poga = qobject_cast<QPushButton*>(sender());
-    QString pogasTeksts = poga->text();
-    QString teksts = ui->field->text();
-    QString papildinajums;  // Šī vērtība būs pievienota teksta laukam.
+    QPushButton *poga = qobject_cast<QPushButton*>(sender());
 
-    if (pogasTeksts == "-") {
-        if (teksts == "-") return;
-
-        bool pedejaisCipars = !teksts.isEmpty() && teksts.back().isDigit();
-        bool pedejaisOp = (
-            teksts.endsWith('/') ||
-            teksts.endsWith('x') ||
-            teksts.endsWith('+') ||
-            teksts.endsWith('-')
-        );
-
-        bool pirmsPedejaisOp = false;
-
-        if (teksts.length() >= 2) {
-            QChar ieprieksejais = teksts[teksts.size() - 2];
-            pirmsPedejaisOp = (
-                ieprieksejais == '/' ||
-                ieprieksejais == 'x' ||
-                ieprieksejais == '+' ||
-                ieprieksejais == '-'
-            );
-        }
-
-        if (teksts.isEmpty() || pedejaisCipars || (pedejaisOp && !pirmsPedejaisOp)) {
-            papildinajums = pogasTeksts;
-        } else return;
-    }
-    else if (pogasTeksts == ",") {
-        // Operatori atdala numurus kuriem var būt komats.
-        int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[/x+-]"));
-        QString pedejaisSkaitlis = teksts.mid(pedejaisOp + 1);
-
-        if (!pedejaisSkaitlis.contains(",")) {
-            papildinajums = ",";
-        }
-    }
-    else if (pogasTeksts == "C") {
-        ui->field->setText(NULL);
-    }
-    else {
-        // Neatļaujam lietotājam ievadīt simbolu ja lauka beigās nav ievadīts kaut viens cipars!
-        if (!teksts.isEmpty() && teksts.back().isDigit()) {
-            papildinajums = pogasTeksts;
-        }
-    }
-
-    if (!papildinajums.isEmpty()) ui->field->setText(teksts + papildinajums);
+    this->pielikt(poga->text());
 }
 
 void MainWindow::equalsNospiesana() {
     bool joksAtrasts = false;
 
-    std::string izteiksme = ui->field->text().toStdString();
+    QString qtIzteiksme = ui->field->text();
+    std::string izteiksme = qtIzteiksme.toStdString();
+
+    // Pārbaudām vai lietotājs nav pabeidzis izteiksmi un ja nav tad ignorējam Enter nospiešanu.
+    if (
+        qtIzteiksme.endsWith('/') ||
+        qtIzteiksme.endsWith('x') ||
+        qtIzteiksme.endsWith('+') ||
+        qtIzteiksme.endsWith('-')
+    ) return;
+
     std::deque<Tokens> tokeni = dabutTokenus(izteiksme);
     std::queue<Tokens> rinda = algoritms(tokeni);
 
@@ -319,6 +311,82 @@ void MainWindow::equalsNospiesana() {
 
     ui->field->setText(QString::fromStdString(rezultatuTeksts).replace(".", ","));
     this->isJoke = joksAtrasts;
+}
+
+void MainWindow::vienaDzesana() {
+    QString teksts = ui->field->text();
+    teksts.chop(1);
+
+    ui->field->setText(teksts);
+}
+
+void MainWindow::visaDzesana() {
+    ui->field->clear();
+}
+
+void MainWindow::pielikt(QString vertiba) {
+    QString teksts = ui->field->text();
+    QString papildinajums;  // Šī vērtība būs pievienota teksta laukam.
+
+    // Sagatavojam lauciņu nākamajam aprēķinam ja ir bijis joks (kurš varētu sastāvēt no burtiem).
+    if (this->isJoke) {
+        ui->field->clear();
+        teksts = "";
+
+        this->isJoke = false;
+    }
+
+    if (vertiba == "C") {
+        ui->field->clear();
+    }
+
+    if (vertiba == "-") {
+        if (teksts == "-") return;
+
+        bool pedejaisCipars = !teksts.isEmpty() && teksts.back().isDigit();
+        bool pedejaisOp = (
+            teksts.endsWith('/') ||
+            teksts.endsWith('x') ||
+            teksts.endsWith('+') ||
+            teksts.endsWith('-')
+        );
+        bool pirmsPedejaisOp = false;
+
+        if (teksts.size() >= 2) {
+            QChar ieprieksejais = teksts[teksts.size() - 2];
+            pirmsPedejaisOp = (
+                ieprieksejais == '/' ||
+                ieprieksejais == 'x' ||
+                ieprieksejais == '+' ||
+                ieprieksejais == '-'
+            );
+
+            if (teksts.isEmpty() || pedejaisCipars || (pedejaisOp && !pirmsPedejaisOp)) {
+                papildinajums = vertiba;
+            }
+        }
+    }
+    else if (vertiba == ",") {
+        // Operatori atdala numurus kuriem var būt komats.
+        int pedejaisOp = teksts.lastIndexOf(QRegularExpression("[/x+-]"));
+        QString pedejaisSkaitlis = teksts.mid(pedejaisOp + 1);
+
+        if (!pedejaisSkaitlis.contains(",")) {
+            papildinajums = ",";
+        }
+    }
+    else if (vertiba == "/" || vertiba == "x" || vertiba == "+") {
+        // Neatļaujam lietotājam ievadīt simbolu ja lauka beigās nav ievadīts kaut viens cipars!
+        if (!teksts.isEmpty() && teksts.back().isDigit()) {
+            papildinajums = vertiba;
+        }
+    }
+    else {
+        if (teksts == "0") ui->field->setText(vertiba);
+        else papildinajums = vertiba;
+    }
+
+    if (!papildinajums.isEmpty()) ui->field->setText(teksts + papildinajums);
 }
 
 MainWindow::~MainWindow() {

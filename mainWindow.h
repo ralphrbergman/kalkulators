@@ -44,6 +44,9 @@ private slots:
     void ciparuNospiesana();
     void simboluNospiesana();
     void equalsNospiesana();
+    void vienaDzesana();
+    void visaDzesana();
+    void pielikt(QString vertiba);
 };
 
 #endif
