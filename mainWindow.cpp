@@ -51,14 +51,29 @@ void MainWindow::simboluNospiesana() {
     QString papildinajums;  // Šī vērtība būs pievienota teksta laukam.
 
     if (pogasTeksts == "-") {
-        if (
-            teksts.isEmpty() ||
-            teksts.back() == "/" ||
-            teksts.back() == "x" ||
-            teksts.back() == "+"
-        ) {
-            papildinajums = pogasTeksts;
+        bool pedejaisCipars = !teksts.isEmpty() && teksts.back().isDigit();
+        bool pedejaisOp = (
+            teksts.endsWith('/') ||
+            teksts.endsWith('x') ||
+            teksts.endsWith('+') ||
+            teksts.endsWith('-')
+        );
+
+        bool pirmsPedejaisOp = false;
+
+        if (teksts.length() >= 2) {
+            QChar ieprieksejais = teksts[teksts.size() - 2];
+            pirmsPedejaisOp = (
+                ieprieksejais == '/' ||
+                ieprieksejais == 'x' ||
+                ieprieksejais == '+' ||
+                ieprieksejais == '-'
+            );
         }
+
+        if (teksts.isEmpty() || pedejaisCipars || (pedejaisOp && !pirmsPedejaisOp)) {
+            papildinajums = pogasTeksts;
+        } else return;
     }
     else if (pogasTeksts == ",") {
         // Operatori atdala numurus kuriem var būt komats.
