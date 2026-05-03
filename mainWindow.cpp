@@ -184,6 +184,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Nerādam lietotājam "Lauks" tekstu, tas maisīsies ar tālāk ievadītajiem cipariem.
     ui->field->setText("");
 
+    // Savienot ciparnīcu ar "ciparuNospiesana" pasākuma metodi.
     this->skaitluPogas[0] = ui->seven;
     this->skaitluPogas[1] = ui->eight;
     this->skaitluPogas[2] = ui->nine;
@@ -201,11 +202,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(poga, &QPushButton::clicked, this, &MainWindow::ciparuNospiesana);
     }
 
+    // Savienot simbolus ar "simboluNospiesana" pasākuma metodi.
     this->simboluPogas[0] = ui->division;
     this->simboluPogas[1] = ui->multiply;
     this->simboluPogas[2] = ui->plus;
     this->simboluPogas[3] = ui->minus;
     this->simboluPogas[4] = ui->comma;
+    this->simboluPogas[5] = ui->clear;
 
     for (QPushButton* poga : this->simboluPogas) {
         if (!poga) continue;
@@ -270,6 +273,9 @@ void MainWindow::simboluNospiesana() {
             papildinajums = ",";
         }
     }
+    else if (pogasTeksts == "C") {
+        ui->field->setText(NULL);
+    }
     else {
         // Neatļaujam lietotājam ievadīt simbolu ja lauka beigās nav ievadīts kaut viens cipars!
         if (!teksts.isEmpty() && teksts.back().isDigit()) {
@@ -277,7 +283,7 @@ void MainWindow::simboluNospiesana() {
         }
     }
 
-    ui->field->setText(teksts + papildinajums);
+    if (!papildinajums.isEmpty()) ui->field->setText(teksts + papildinajums);
 }
 
 void MainWindow::equalsNospiesana() {

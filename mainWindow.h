@@ -22,7 +22,7 @@ private:
 
     QString operatori = "/x+-";
     QPushButton* skaitluPogas[10] = {};
-    QPushButton* simboluPogas[5] = {};
+    QPushButton* simboluPogas[6] = {};
 
     bool isJoke = false;
 
