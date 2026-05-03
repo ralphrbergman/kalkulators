@@ -264,7 +264,14 @@ void MainWindow::simboluNospiesana() {
     ui->field->setText(teksts + papildinajums);
 }
 
-void MainWindow::equalsNospiesana() {}
+void MainWindow::equalsNospiesana() {
+    std::string izteiksme = ui->field->text().toStdString();
+    std::deque<Tokens> tokeni = dabutTokenus(izteiksme);
+    std::queue<Tokens> rinda = algoritms(tokeni);
+    double rezultats = aprekinat(rinda);
+
+    ui->field->setText(QString::number(rezultats));
+}
 
 MainWindow::~MainWindow() {
     delete ui;
