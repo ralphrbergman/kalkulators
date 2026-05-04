@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QString>
+#include <functional>
 #include <map>
 
 QT_BEGIN_NAMESPACE
@@ -39,6 +40,10 @@ private:
         {"69", "Nice"},
         {"420", "WEED"}
     };
+
+    // Joku vektors ar funkcijām kuras dinamiski izvērtē aritmētisko izteiksmi un gala rezultātu
+    // lai pasniegtu joku.
+    std::vector<std::function<std::string(std::string, std::string)>> funkcijuJoki = {};
 
 private slots:
     void ciparuNospiesana();

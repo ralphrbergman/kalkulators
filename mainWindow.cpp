@@ -32,8 +32,8 @@ std::deque<Tokens> dabutTokenus(std::string izteiksme) {
     QRegularExpressionMatchIterator iterators = visiTokeni.globalMatch(teksts);
 
     while (iterators.hasNext()) {
-        QRegularExpressionMatch match = iterators.next();
-        QString vertiba = match.captured(0);
+        QRegularExpressionMatch atbilstiba = iterators.next();
+        QString vertiba = atbilstiba.captured(0);
 
         Tokens tokens;
         tokens.vertiba = vertiba.toStdString();
@@ -178,10 +178,42 @@ double aprekinat(std::queue<Tokens> izvade) {
     return operandi[0];
 }
 
+std::string vecumaJoks(std::string izteiksme, std::string rezultats) {
+    if (izteiksme.find('+') != std::string::npos) {
+        QRegularExpression re("\\d+");
+        QRegularExpressionMatchIterator iterators = re.globalMatch(
+            QString::fromStdString(izteiksme)
+        );
+
+        QList<int> atrastieNumuri;
+
+        while (iterators.hasNext()) {
+            atrastieNumuri.append(iterators.next().captured(0).toInt());
+        }
+
+        if (atrastieNumuri.isEmpty()) {
+            return rezultats;
+        }
+
+        int pirmaVertiba = atrastieNumuri.front();
+        int pedejaVertiba = atrastieNumuri.back();
+
+        bool irDiapozona = ( pirmaVertiba >= 0 && pirmaVertiba <= 15 );
+        bool parsniedz = ( pedejaVertiba > 17 );
+
+        if (irDiapozona && parsniedz) return "ILLEGAL";
+    }
+
+    return rezultats;
+}
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->setFixedSize(QSize(400, 625));
+
+    // Pievienojam funkciju jokus.
+    this->funkcijuJoki.push_back(vecumaJoks);
 
     // Nerādam lietotājam "Lauks" tekstu, tas maisīsies ar tālāk ievadītajiem cipariem.
     ui->field->setText("");
@@ -307,6 +339,18 @@ void MainWindow::equalsNospiesana() {
     }
     else if (!joksAtrasts) {
         rezultatuTeksts = rezultats;
+    }
+
+    // Atrodam dinamiskos jokus no funkcijām.
+    for (auto &funkcija : this->funkcijuJoki) {
+        std::string joks = funkcija(izteiksme, rezultats);
+
+        if (joks != rezultats) {
+            rezultatuTeksts = joks;
+            joksAtrasts = true;
+
+            break;
+        }
     }
 
     ui->field->setText(QString::fromStdString(rezultatuTeksts).replace(".", ","));
